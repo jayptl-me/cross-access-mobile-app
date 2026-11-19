@@ -1,53 +1,87 @@
-> Edited for use in IDX on 07/09/12
+# Cross-Net Mobile
 
-# Welcome to your Expo app 👋
+An Expo React Native multi-chain wallet app with a built-in dapp browser
+and WalletConnect support.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Cross-Net Mobile creates or imports Ethereum and Polygon wallets, shows
+native and token balances through Alchemy, sends transactions and connects
+to dapps from an in-app WebView browser over WalletConnect. Navigation is
+file-based with expo-router.
 
-## Get started
+- **Wallet management.** Create a random wallet or import by private key
+  or mnemonic, per chain, backed by ethers v5.
+- **Ethereum and Polygon.** Mainnet providers plus Goerli and Mumbai
+  testnet entries in `services/WalletService.ts`; Solana and Binance are
+  declared in the `ChainType` enum but not wired up.
+- **Portfolio.** Native balance plus ERC-20 token balances and metadata
+  fetched with the Alchemy SDK.
+- **Send and sign.** Simple ETH sends and message signing from the wallet
+  tab.
+- **Dapp browser.** The home tab embeds a WebView and initialises
+  WalletConnect `Web3Wallet`/`SignClient` for session requests.
+- **Expo throughout.** Expo SDK 52, React Native 0.76, typed routes and
+  the new architecture enabled.
 
-#### Android
+## Run it
 
-Android previews are defined as a `workspace.onStart` hook and started as a vscode task when the workspace is opened/started.
+### Prerequisites
 
-Note, if you can't find the task, either:
-- Rebuild the environment (using command palette: `IDX: Rebuild Environment`), or
-- Run `npm run android -- --tunnel` command manually run android and see the output in your terminal. The device should pick up this new command and switch to start displaying the output from it.
+- Node.js and npm
+- Expo Go on a device, or an Android emulator / iOS simulator
+- An Alchemy API key and a WalletConnect Cloud project ID
 
-In the output of this command/task, you'll find options to open the app in a
+### Configure
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Two placeholders must be replaced before the wallet features work:
 
-You'll also find options to open the app's developer menu, reload the app, and more.
+- `services/WalletService.ts` - `YOUR_ALCHEMY_API_KEY` in `setupProviders`
+- `app/(tabs)/index.tsx` - `YOUR_PROJECT_ID` for WalletConnect
 
-#### Web
+### Start
 
-Web previews will be started and managred automatically. Use the toolbar to manually refresh.
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm install
+npm start          # expo start --tunnel
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Other targets:
 
-## Learn more
+```sh
+npm run android    # expo start --android
+npm run ios        # expo start --ios --tunnel
+npm run web        # expo start --web --tunnel
+npm test           # jest --watchAll (jest-expo preset)
+npm run lint       # expo lint
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+The `--tunnel` flags suit environments such as Project IDX (a `.idx/`
+workspace config is included); remove them for plain local development.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Project structure
 
-## Join the community
+```
+app/
+  (tabs)/
+    index.tsx       # Dapp browser tab (WebView + WalletConnect)
+    wallet.tsx      # Wallet, balances and sends
+    explore.tsx     # Placeholder template screen
+    settings.tsx    # Settings rows (partly placeholder)
+  _layout.tsx       # Root layout
+components/         # Themed view/text, tab bar, UI primitives
+services/
+  WalletService.ts  # Singleton: keys, providers, Alchemy, sends
+hooks/              # Colour scheme and theme helpers
+constants/          # Colour tokens
+```
 
-Join our community of developers creating universal apps.
+## Security notes
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Private keys are stored unencrypted in AsyncStorage under
+  `wallet_<chain>`. Treat this build as development grade and use test
+  accounts.
+- The Alchemy key and WalletConnect project ID are compiled into the app
+  bundle once set.
+
+## License
+
+Apache-2.0 - see [LICENSE](LICENSE) and [NOTICE](NOTICE).
